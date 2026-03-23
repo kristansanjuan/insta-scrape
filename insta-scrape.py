@@ -51,6 +51,10 @@ def scrape_instagram(task_id, session_id, target_username):
     filename = f"{target_username}_{task_id}.csv"
 
     with open(filename, "w", newline="", encoding="utf-8") as f:
+        if not data:
+            tasks[task_id]["status"] = "error"
+            return
+
         writer = csv.DictWriter(f, fieldnames=data[0].keys())
         writer.writeheader()
         writer.writerows(data)
@@ -75,7 +79,7 @@ def form_page():
         <form id="form">
             Session ID:<br>
             <input type="text" id="session_id" style="width:400px;"><br><br>
-ss
+
             Username:<br>
             <input type="text" id="username"><br><br>
 
@@ -122,6 +126,11 @@ ss
                     document.getElementById("status").innerHTML =
                         `Done! <a href="/download/${task_id}">Download CSV</a>`;
                 }
+
+                if (data.status === "error") {
+                    clearInterval(interval);
+                    document.getElementById("status").innerText = "Error during scraping";
+                }
             }, 1000);
         }
         </script>
@@ -135,6 +144,12 @@ ss
 # -----------------------
 @app.post("/start")
 async def start_task(request: dict):
+    if "session_id" not in request or "username" not in request:
+        return {"error": "Missing input"}
+
+    if not request["session_id"] or not request["username"]:
+        return {"error": "Empty values"}
+
     task_id = str(uuid.uuid4())
 
     tasks[task_id] = {
@@ -144,12 +159,12 @@ async def start_task(request: dict):
         "file": None
     }
 
-    # run in background
     import threading
     threading.Thread(
         target=scrape_instagram,
-        args=(task_id, request["session_id"], request["username"])
-    ).start()
+        args=(task_id, request["session_id"], request["username"]),
+        daemon=True
+    ).start()   
 
     return {"task_id": task_id}
 
