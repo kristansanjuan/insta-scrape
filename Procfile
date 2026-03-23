@@ -1,1 +1,1 @@
-web: uvicorn insta-scrape.py --host 0.0.0.0 --port $port
+web: python insta-scrape.py
