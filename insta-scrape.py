@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from instagrapi import Client
@@ -188,3 +190,9 @@ def download(task_id: str):
         return {"error": "File not ready"}
 
     return FileResponse(task["file"], filename=task["file"])
+
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
