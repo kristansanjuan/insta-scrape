@@ -173,3 +173,7 @@ def download(task_id: str):
         return {"error": "File not ready"}
 
     return FileResponse(task["file"], filename=task["file"])
+
+    .env
+__pycache__/
+*.pyc
